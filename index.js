@@ -7,7 +7,21 @@ const { sendTemplate } = require("./sendTemplate");
 
 app.use(express.json());
 
-// Ruta principal de Webhook (producción)
+// Ruta GET para verificación del Webhook con Meta
+app.get("/webhook", (req, res) => {
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
+
+  if (mode === "subscribe" && token === process.env.VERIFY_TOKEN) {
+    console.log("Webhook verificado correctamente");
+    res.status(200).send(challenge);
+  } else {
+    res.sendStatus(403);
+  }
+});
+
+// Ruta POST del Webhook para recibir mensajes de WhatsApp
 app.post("/webhook", async (req, res) => {
   const entry = req.body.entry?.[0];
   const changes = entry?.changes?.[0];
@@ -41,7 +55,7 @@ app.post("/webhook", async (req, res) => {
   res.sendStatus(200);
 });
 
-// Ruta temporal de prueba manual
+// Ruta temporal para probar envío de plantilla manualmente
 app.post("/enviar-template", async (req, res) => {
   const { numero, template } = req.body;
 
