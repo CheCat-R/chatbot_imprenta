@@ -1,10 +1,13 @@
 const express = require("express");
 const app = express();
+require("dotenv").config();
+
 const plantillaMap = require("./plantillaMap");
-const { sendTemplate } = require("./sendTemplate"); // este sería el helper para enviar mensajes
+const { sendTemplate } = require("./sendTemplate");
 
 app.use(express.json());
 
+// Ruta principal de Webhook (producción)
 app.post("/webhook", async (req, res) => {
   const entry = req.body.entry?.[0];
   const changes = entry?.changes?.[0];
@@ -15,7 +18,7 @@ app.post("/webhook", async (req, res) => {
   const message = messages[0];
   const from = message.from;
 
-  // Mensajes de texto como "hola" o "inicio"
+  // Mensaje de texto
   if (message.type === "text") {
     const text = message.text.body.toLowerCase();
     if (text.includes("hola") || text.includes("inicio")) {
@@ -23,7 +26,7 @@ app.post("/webhook", async (req, res) => {
     }
   }
 
-  // Botones
+  // Mensaje de botón interactivo
   if (message.type === "interactive") {
     const buttonId = message.interactive?.button_reply?.id;
     const plantilla = plantillaMap[buttonId];
@@ -36,4 +39,26 @@ app.post("/webhook", async (req, res) => {
   }
 
   res.sendStatus(200);
+});
+
+// Ruta temporal de prueba manual
+app.post("/enviar-template", async (req, res) => {
+  const { numero, template } = req.body;
+
+  if (!numero || !template) {
+    return res.status(400).json({ error: "Faltan datos: numero o template" });
+  }
+
+  try {
+    await sendTemplate(numero, template);
+    res.json({ mensaje: "Plantilla enviada correctamente" });
+  } catch (error) {
+    console.error("Error en /enviar-template:", error.response?.data || error.message);
+    res.status(500).json({ error: "No se pudo enviar la plantilla" });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log('Servidor corriendo en puerto ${PORT}');
 });

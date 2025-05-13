@@ -1,8 +1,8 @@
 const axios = require("axios");
+require("dotenv").config();
 
-const WHATSAPP_API_URL =
-  "https://graph.facebook.com/v18.0/YOUR_PHONE_NUMBER_ID/messages";
-const ACCESS_TOKEN = "YOUR_ACCESS_TOKEN";
+const WHATSAPP_API_URL = 'https://graph.facebook.com/v18.0/${process.env.PHONE_NUMBER_ID}/messages';
+const ACCESS_TOKEN = process.env.WHATSAPP_TOKEN;
 
 async function sendTemplate(recipientNumber, templateName) {
   try {
@@ -15,19 +15,19 @@ async function sendTemplate(recipientNumber, templateName) {
         template: {
           name: templateName,
           language: {
-            code: "es_AR", // o el que estés usando
+            code: "es_AR", // Cambiar si el idioma del template es diferente
           },
         },
       },
       {
         headers: {
-          Authorization: "Bearer ${ACCESS_TOKEN}",
+          Authorization: 'Bearer ${ACCESS_TOKEN}',
           "Content-Type": "application/json",
         },
       }
     );
 
-    console.log("Plantilla enviada: ${templateName} a ${recipientNumber}");
+    console.log('Plantilla enviada: ${templateName} a ${recipientNumber}');
   } catch (error) {
     console.error(
       "Error enviando plantilla:",
