@@ -23,6 +23,7 @@ app.get("/webhook", (req, res) => {
 
 // Ruta POST del Webhook para recibir mensajes de WhatsApp
 app.post("/webhook", async (req, res) => {
+  console.log("Webhook recibido:", JSON.stringify(req.body, null, 2));
   const entry = req.body.entry?.[0];
   const changes = entry?.changes?.[0];
   const messages = changes?.value?.messages;
